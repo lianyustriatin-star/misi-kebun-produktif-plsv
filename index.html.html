@@ -1,0 +1,1176 @@
+<!doctype html>
+<!--
+AUDIT DAN REVISI — 26 Oktober 2026
+1. Lampiran memiliki banyak teks kosong dan tiga gambar tanpa src.
+   Teks pengganti disusun berdasarkan struktur slide; bukan pemulihan teks asli.
+   Revisi gambar: tiga ilustrasi SVG ditanam sebagai data URI agar dapat muncul offline.
+   Ilustrasi ini merupakan pengganti, bukan foto asli dari editor.
+2. Injeksi bootstrap dan SDK editor serta dependensi JS yang tidak digunakan
+   dihapus untuk versi HTML mandiri. Versi ini bukan paket integrasi editor Canva.
+3. Jumlah awal diperbaiki menjadi 14 slide; penghitung berikutnya tetap dinamis.
+4. Laboratorium menjaga kesetaraan kedua ruas, bukan menuntut ekspresi identik.
+   Timbangan datar menyimbolkan kesetaraan untuk solusi persamaan tersebut.
+5. Pembulatan tiap operasi dihapus; format tampilan dibatasi 12 digit signifikan.
+   JavaScript Number tetap memiliki batas presisi; ini bukan aritmetika rasional eksak.
+6. Kali/bagi dengan nol ditolak; hasil di luar batas simulasi ditolak sebelum mutasi.
+7. Kriteria selesai memeriksa kedua ruas; input koefisien dinonaktifkan saat kali/bagi.
+8. State soal disalin agar objek soal awal tidak termutasi. Variabel mati dibuang.
+9. Tombol operasi diberi aria-pressed, fokus keyboard diperjelas, navigasi panah,
+   Home dan End ditambahkan tanpa mengganggu input/tombol yang sedang difokuskan.
+10. Font lokal dan CSS mandiri menggantikan kebutuhan CDN; Wordwall tetap eksternal.
+VALIDASI: uji JavaScript dengan DOM tiruan lulus untuk navigasi, timbangan,
+ketiga tipe soal, larangan nol, putaran bagi/kali 7, ID unik dan target ARIA.
+Pengujian visual/responsif di browser belum dilakukan: executable browser tidak tersedia.
+Tautan Wordwall dipertahankan dari sumber; akses eksternal belum diverifikasi.
+-->
+
+<html lang="id">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Misi Kebun Produktif — PLSV</title>
+  <style>
+    :root {
+      --deep:#0c2b23;
+      --forest:#12392e;
+      --leaf:#bce978;
+      --cream:#f8f5e9;
+      --ink:#193b30;
+      --gold:#f5cd64;
+    }
+    * {
+      box-sizing:border-box;
+    }
+    body {
+      margin:0;
+      width:100%;
+      font-family:Nunito,sans-serif;
+      color:var(--cream);
+    }
+    button {
+      cursor:pointer;
+    }
+    :is(button,a,input):focus-visible {
+      outline:3px solid var(--gold);
+      outline-offset:3px;
+    }
+    button:disabled {
+      opacity:.42;
+      cursor:not-allowed;
+    }
+    [hidden] {
+      display:none!important;
+    }
+    .app-shell {
+      width:100%;
+      min-height:calc(100 * min(var(--vh, 1vh), 1vh));
+      padding:20px clamp(16px,4vw,54px) 26px;
+      background:radial-gradient(circle at 90% 5%,#315d3b 0,transparent 32%),radial-gradient(circle at 0% 95%,#275245 0,transparent 32%),var(--deep);
+    }
+    .topbar,.bottom-bar {
+      max-width:1380px;
+      margin:auto;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+    }
+    .brand {
+      display:flex;
+      align-items:center;
+      gap:12px;
+      font-weight:900;
+      letter-spacing:.07em;
+      text-transform:uppercase;
+      font-size:12px;
+    }
+    .brand-mark {
+      width:36px;
+      height:36px;
+      border-radius:12px;
+      display:grid;
+      place-items:center;
+      background:var(--leaf);
+      color:var(--deep);
+      font-size:21px;
+    }
+    .top-meta,.progress-label {
+      font-size:13px;
+      font-weight:900;
+      white-space:nowrap;
+    }
+    .slide-frame {
+      max-width:1380px;
+      margin:18px auto 16px;
+      min-height:min(680px,calc(100 * min(var(--vh, 1vh), 1vh) - 160px));
+      border:1px solid #63836d;
+      border-radius:28px;
+      background:var(--cream);
+      color:var(--ink);
+      box-shadow:0 25px 70px #061e1880;
+      overflow:hidden;
+    }
+    .slide {
+      display:none;
+      min-height:inherit;
+      padding:clamp(25px,4.5vw,65px);
+      animation:rise .35s ease both;
+    }
+    .slide.active {
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+    }
+    @keyframes rise {
+      from {
+        opacity:0;
+        transform:translateY(10px);
+      }
+      to {
+        opacity:1;
+        transform:translateY(0);
+      }
+    }
+    .eyebrow {
+      text-transform:uppercase;
+      letter-spacing:.18em;
+      color:#54775c;
+      font-weight:900;
+      font-size:12px;
+      margin:0 0 13px;
+    }
+    h1,h2 {
+      font-family:Fraunces,serif;
+      line-height:1.12;
+      letter-spacing:-.035em;
+    }
+    h1 {
+      font-size:clamp(46px,7vw,96px);
+      max-width:790px;
+      margin:0 0 22px;
+    }
+    h2 {
+      font-size:clamp(32px,4.3vw,59px);
+      max-width:1000px;
+      margin:0 0 18px;
+    }
+    .lead {
+      font-size:clamp(17px,1.8vw,22px);
+      line-height:1.5;
+      max-width:950px;
+      color:#456153;
+      margin:0 0 19px;
+    }
+    .split {
+      display:grid;
+      grid-template-columns:1fr .8fr;
+      align-items:center;
+      gap:clamp(25px,5vw,70px);
+    }
+    .photo {
+      width:100%;
+      height:clamp(260px,35vw,465px);
+      object-fit:cover;
+      border-radius:20px;
+      box-shadow:15px 15px 0 #d7e7bc;
+    }
+    .note {
+      background:#f6e9b9;
+      border-left:5px solid #d7aa3b;
+      border-radius:0 15px 15px 0;
+      padding:16px 20px;
+      line-height:1.5;
+      font-weight:800;
+      max-width:920px;
+    }
+    .cards {
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:16px;
+      margin-top:18px;
+    }
+    .card {
+      background:#e7eedc;
+      border-radius:19px;
+      padding:23px;
+      line-height:1.5;
+    }
+    .card strong {
+      display:block;
+      margin-bottom:9px;
+      font-size:20px;
+    }
+    .card p {
+      margin:0;
+      color:#456153;
+    }
+    .formula {
+      display:inline-block;
+      align-self:flex-start;
+      background:var(--forest);
+      color:#fff;
+      border-radius:16px;
+      padding:13px 22px;
+      font-size:clamp(22px,3vw,35px);
+      font-weight:900;
+      box-shadow:7px 7px 0 #c2d9a4;
+      margin:5px 0 20px;
+    }
+    .scale-panel {
+      background:#e7eedc;
+      border-radius:22px;
+      padding:18px 22px 22px;
+      max-width:1050px;
+      width:100%;
+      margin:5px 0 16px;
+    }
+    .scale-art {
+      position:relative;
+      max-width:790px;
+      height:210px;
+      margin:auto;
+    }
+    .scale-moving {
+      position:absolute;
+      top:38px;
+      left:5%;
+      width:90%;
+      height:160px;
+      transform:rotate(var(--tilt,0deg));
+      transition:transform .5s ease;
+    }
+    .scale-beam {
+      position:absolute;
+      top:19px;
+      left:0;
+      right:0;
+      height:10px;
+      background:var(--forest);
+      border-radius:10px;
+    }
+    .scale-pan {
+      position:absolute;
+      top:25px;
+      width:37%;
+      height:116px;
+      text-align:center;
+    }
+    .scale-pan.left {
+      left:-2%;
+    }
+    .scale-pan.right {
+      right:-2%;
+    }
+    .scale-pan:before,.scale-pan:after {
+      content:"";
+      position:absolute;
+      top:0;
+      width:3px;
+      height:67px;
+      background:#54775c;
+    }
+    .scale-pan:before {
+      left:8%;
+      transform:rotate(13deg);
+    }
+    .scale-pan:after {
+      right:8%;
+      transform:rotate(-13deg);
+    }
+    .pan-bowl {
+      position:absolute;
+      bottom:0;
+      width:100%;
+      min-height:65px;
+      border-radius:12px 12px 55px 55px;
+      background:#fff;
+      border:3px solid #54775c;
+      display:grid;
+      place-items:center;
+      padding:8px;
+      font-size:clamp(17px,2vw,24px);
+      font-weight:900;
+    }
+    .pivot {
+      position:absolute;
+      top:64px;
+      left:50%;
+      transform:translateX(-50%);
+      width:0;
+      height:0;
+      border-left:25px solid transparent;
+      border-right:25px solid transparent;
+      border-bottom:113px solid #54775c;
+    }
+    .base {
+      position:absolute;
+      bottom:11px;
+      left:calc(50% - 68px);
+      width:136px;
+      height:13px;
+      background:var(--forest);
+      border-radius:10px;
+    }
+    .scale-controls {
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:15px;
+      max-width:790px;
+      margin:auto;
+    }
+    .control-group {
+      text-align:center;
+    }
+    .control-group p {
+      margin:0 0 8px;
+      font-weight:900;
+    }
+    .button-row {
+      display:flex;
+      justify-content:center;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+    .action,.nav-btn {
+      border:0;
+      border-radius:12px;
+      background:var(--forest);
+      color:#fff;
+      padding:11px 17px;
+      font-weight:900;
+    }
+    .action.secondary {
+      background:#e1ebd0;
+      color:var(--ink);
+      border:1px solid #a4bd94;
+    }
+    .status {
+      background:#f6e9b9;
+      border-radius:15px;
+      padding:12px 17px;
+      font-weight:900;
+      max-width:1050px;
+      line-height:1.4;
+    }
+    .step-row {
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .worked {
+      background:#e7eedc;
+      border-radius:16px;
+      padding:15px 20px;
+      max-width:1050px;
+      line-height:1.5;
+      font-weight:800;
+      margin:4px 0 17px;
+    }
+    .problem-layout {
+      display:grid;
+      grid-template-columns:minmax(0,1fr) minmax(210px,.38fr);
+      align-items:start;
+      gap:25px;
+    }
+    .problem-photo {
+      width:100%;
+      height:225px;
+      object-fit:cover;
+      border-radius:18px;
+      box-shadow:9px 9px 0 #d7e7bc;
+    }
+    .solution {
+      margin-top:16px;
+      background:#e7eedc;
+      border-radius:18px;
+      padding:17px 21px;
+      max-width:1030px;
+      line-height:1.5;
+    }
+    .lab-types {
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      margin:0 0 14px;
+    }
+    .lab-type {
+      border:1px solid #a4bd94;
+      background:#e1ebd0;
+      color:#193b30;
+      border-radius:10px;
+      padding:10px 13px;
+      font-weight:900;
+    }
+    .lab-type.active {
+      background:#bce978;
+      color:#0c2b23;
+      box-shadow:0 0 0 3px #f5cd64;
+    }
+    .lab-card {
+      background:#19404b;
+      color:#f8f5e9;
+      border:1px solid #41707a;
+      border-radius:22px;
+      padding:22px;
+      max-width:1050px;
+      width:100%;
+    }
+    .lab-equation {
+      font-family:Fraunces,serif;
+      font-size:clamp(28px,4vw,54px);
+      font-weight:700;
+      text-align:center;
+      margin:10px 0 20px;
+    }
+    .lab-scale {
+      position:relative;
+      height:155px;
+      max-width:620px;
+      margin:0 auto 18px;
+      background:#245461;
+      border-radius:16px;
+      overflow:hidden;
+    }
+    .lab-scale-moving {
+      position:absolute;
+      top:28px;
+      left:7%;
+      width:86%;
+      height:112px;
+      transition:transform .45s ease;
+    }
+    .lab-scale-beam {
+      position:absolute;
+      top:12px;
+      left:0;
+      right:0;
+      height:8px;
+      border-radius:8px;
+      background:#bce978;
+    }
+    .lab-scale-pan {
+      position:absolute;
+      top:18px;
+      width:34%;
+      height:82px;
+      text-align:center;
+    }
+    .lab-scale-pan.left {
+      left:0;
+    }
+    .lab-scale-pan.right {
+      right:0;
+    }
+    .lab-scale-pan:before,.lab-scale-pan:after {
+      content:"";
+      position:absolute;
+      top:0;
+      width:2px;
+      height:45px;
+      background:#c9e4da;
+    }
+    .lab-scale-pan:before {
+      left:12%;
+      transform:rotate(15deg);
+    }
+    .lab-scale-pan:after {
+      right:12%;
+      transform:rotate(-15deg);
+    }
+    .lab-pan-bowl {
+      position:absolute;
+      bottom:0;
+      width:100%;
+      min-height:42px;
+      border:2px solid #c9e4da;
+      border-radius:8px 8px 30px 30px;
+      background:#f8f5e9;
+      color:#193b30;
+      display:grid;
+      place-items:center;
+      padding:5px;
+      font-weight:900;
+      font-size:14px;
+    }
+    .lab-pivot {
+      position:absolute;
+      top:46px;
+      left:50%;
+      transform:translateX(-50%);
+      border-left:18px solid transparent;
+      border-right:18px solid transparent;
+      border-bottom:76px solid #c9e4da;
+    }
+    .lab-base {
+      position:absolute;
+      bottom:10px;
+      left:calc(50% - 46px);
+      width:92px;
+      height:8px;
+      border-radius:8px;
+      background:#bce978;
+    }
+    .lab-controls {
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:8px;
+    }
+    .lab-controls button {
+      border:1px solid #61838a;
+      background:#245461;
+      color:#f8f5e9;
+      border-radius:10px;
+      padding:10px;
+      font-weight:900;
+    }
+    .lab-controls button.active {
+      background:#bce978!important;
+      color:#0c2b23!important;
+      box-shadow:0 0 0 3px #f5cd64;
+    }
+    .lab-inputs {
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:14px;
+    }
+    .lab-inputs label {
+      font-weight:800;
+    }
+    .lab-inputs input {
+      width:90px;
+      border:0;
+      border-radius:9px;
+      padding:9px;
+      color:#000;
+    }
+    .lab-steps {
+      margin:14px 0 0;
+      padding-left:20px;
+      color:#d9e9e3;
+      line-height:1.6;
+    }
+    @media(max-width:760px) {
+      .lab-controls {
+        grid-template-columns:repeat(2,1fr);
+      }
+    }
+    .solution p {
+      margin:5px 0;
+    }
+    .question-card {
+      cursor:pointer;
+      transition:transform .2s ease,box-shadow .2s ease;
+    }
+    .question-card:hover {
+      transform:translateY(-3px);
+      box-shadow:0 8px 18px #193b3022;
+    }
+    .question-card:focus-visible {
+      outline:3px solid var(--gold);
+      outline-offset:3px;
+    }
+    .question-card.is-open {
+      background:#d7e7bc;
+    }
+    .question-answer {
+      margin:0;
+      color:#456153;
+    }
+    .reveal-conclusion {
+      margin-top:18px;
+    }
+    .bottom-bar {
+      align-items:center;
+    }
+    .nav-btn {
+      background:#204a3b;
+      border:1px solid #92b49a;
+    }
+    .progress-wrap {
+      flex:1;
+      max-width:500px;
+      display:flex;
+      align-items:center;
+      gap:12px;
+    }
+    .progress-track {
+      height:8px;
+      border-radius:10px;
+      background:#597d61;
+      flex:1;
+      overflow:hidden;
+    }
+    .progress-fill {
+      height:100%;
+      background:var(--leaf);
+      transition:width .3s;
+    }
+    @media(max-width:760px) {
+      .slide-frame {
+        min-height:570px;
+        border-radius:20px;
+      }
+      .slide {
+        padding:28px 22px;
+      }
+      .split,.problem-layout {
+        grid-template-columns:1fr;
+      }
+      .cards {
+        grid-template-columns:1fr;
+      }
+      .card {
+        padding:15px 18px;
+      }
+      .card strong {
+        font-size:18px;
+      }
+      .photo {
+        height:210px;
+        box-shadow:7px 7px 0 #d7e7bc;
+      }
+      .problem-photo {
+        height:145px;
+        box-shadow:6px 6px 0 #d7e7bc;
+      }
+      .scale-art {
+        height:180px;
+      }
+      .scale-moving {
+        top:29px;
+        height:140px;
+      }
+      .pivot {
+        top:56px;
+        border-bottom-width:100px;
+      }
+      .scale-pan {
+        height:103px;
+      }
+      .scale-pan:before,.scale-pan:after {
+        height:55px;
+      }
+      .pan-bowl {
+        font-size:16px;
+        min-height:59px;
+      }
+      .scale-controls {
+        gap:8px;
+      }
+      .action {
+        padding:9px 11px;
+      }
+      .bottom-bar {
+        flex-wrap:wrap;
+      }
+      .progress-wrap {
+        order:-1;
+        flex-basis:100%;
+        max-width:none;
+      }
+    }
+    @media(prefers-reduced-motion:reduce) {
+      *,*:before,*:after {
+        animation-duration:.01ms!important;
+        transition-duration:.01ms!important;
+      }
+    }
+    /* Standalone replacements for the removed utility framework. */ .mt-3 {
+      margin-top: 12px;
+    }
+    .self-start {
+      align-self: flex-start;
+    }
+    input, button {
+      font: inherit;
+    }
+    .lab-inputs button {
+      border: 0;
+      border-radius: 9px;
+      padding: 10px;
+      background: var(--leaf);
+      color: var(--deep);
+      font-weight: 900;
+    }
+
+
+    .action {
+      display: inline-block;
+      text-decoration: none;
+    }
+    .scale-moving {
+      transform-origin: 50% 24px;
+    }
+    @media(max-width:420px) {
+      .topbar {
+        flex-wrap:wrap;
+      }
+      .brand {
+        letter-spacing:0;
+      }
+      .lab-inputs input {
+        max-width:100%;
+      }
+    }
+  </style>
+  
+  
+  
+  
+  
+ </head>
+ <body data-template-id="__page-root" class="w-full">
+  <noscript>Aktifkan JavaScript untuk menggunakan simulasi.</noscript>
+  <div class="app-shell">
+   <header class="topbar">
+    <div class="brand"><span class="brand-mark" aria-hidden="true">✿</span><span data-template-id="brand-name" class="canva-text">Misi Kebun Produktif · Matematika</span>
+    </div><span id="top-count" class="top-meta" aria-live="polite">01 / 14</span>
+   </header>
+   <main class="slide-frame" aria-label="Presentasi persamaan linear satu variabel">
+    <section class="slide active" aria-label="Slide 1: Judul">
+     <div class="split">
+      <div>
+       <p data-template-id="cover-kicker" class="canva-text eyebrow">Matematika · PLSV</p>
+       <h1 data-template-id="cover-title" class="canva-text">Misi Kebun Produktif</h1>
+       <p data-template-id="cover-description" class="canva-text lead">Belajar persamaan linear satu variabel melalui kegiatan berkebun.</p>
+       <p data-template-id="cover-note" class="canva-text note">Amati, diskusikan, lalu periksa kembali jawabanmu.</p>
+      </div><img data-template-id="garden-photo" class="canva-image photo" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4MDAiIGhlaWdodD0iNjIwIiB2aWV3Qm94PSIwIDAgODAwIDYyMCI+PGRlZnM+PGxpbmVhckdyYWRpZW50IGlkPSJza3kiIHgyPSIwIiB5Mj0iMSI+PHN0b3Agc3RvcC1jb2xvcj0iI2Q5ZTlkYiIvPjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iI2Y4ZjNkOCIvPjwvbGluZWFyR3JhZGllbnQ+PGxpbmVhckdyYWRpZW50IGlkPSJzb2lsIiB4Mj0iMCIgeTI9IjEiPjxzdG9wIHN0b3AtY29sb3I9IiM5NzczNGEiLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiM2MzQ2MmYiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz48cmVjdCB3aWR0aD0iODAwIiBoZWlnaHQ9IjYyMCIgZmlsbD0idXJsKCNza3kpIi8+PGNpcmNsZSBjeD0iNjUyIiBjeT0iMTA5IiByPSI2MCIgZmlsbD0iI2Y0ZDY4MSIvPjxwYXRoIGQ9Ik0wIDI4NVExNzAgMTQ4IDM5MCAyNzVUODAwIDIyNVY2MjBIMCIgZmlsbD0iI2I4Yzk5NyIvPjxwYXRoIGQ9Ik0wIDM0NVEyODAgMjIxIDgwMCAzMjlWNjIwSDAiIGZpbGw9IiM3Mzk1NmIiLz48cGF0aCBkPSJNMzY1IDMyMEg0MzBMNTUwIDYyMEgyMjVaIiBmaWxsPSIjZTRjZGEwIi8+PHBhdGggZD0iTTQ1IDM2MGgyNDVsNDAgNzhIMTBaIiBmaWxsPSJ1cmwoI3NvaWwpIiBzdHJva2U9IiNjNGE2NzciIHN0cm9rZS13aWR0aD0iOCIvPjxwYXRoIGQ9Ik00OTAgMzYwaDI0NWw0MCA3OEg0NTVaIiBmaWxsPSJ1cmwoI3NvaWwpIiBzdHJva2U9IiNjNGE2NzciIHN0cm9rZS13aWR0aD0iOCIvPjxwYXRoIGQ9Ik01IDQ4OGgyNDVsNDAgNzhILTMwWiIgZmlsbD0idXJsKCNzb2lsKSIgc3Ryb2tlPSIjYzRhNjc3IiBzdHJva2Utd2lkdGg9IjgiLz48cGF0aCBkPSJNNTMwIDQ4OGgyNDVsNDAgNzhINDk1WiIgZmlsbD0idXJsKCNzb2lsKSIgc3Ryb2tlPSIjYzRhNjc3IiBzdHJva2Utd2lkdGg9IjgiLz48ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSg5MCAzODkpIHNjYWxlKDAuNykiPjxwYXRoIGQ9Ik0wIDIwVi0yNSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMjM1ODNjIiBzdHJva2Utd2lkdGg9IjciIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPjxwYXRoIGQ9Ik0wLTVDLTQyLTUtNDktMzktNDAtNDItMTQtNDYgMC0yNCAwLTUiIGZpbGw9IiM2ZGE2NDYiLz48cGF0aCBkPSJNMC0xN0MzNS01MiA1OC0zNiAzOS0xNSAyMyAyIDMtNSAwLTE3IiBmaWxsPSIjYThjOTY5Ii8+PC9nPjxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDE3MCAzODkpIHNjYWxlKDAuNykiPjxwYXRoIGQ9Ik0wIDIwVi0yNSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMjM1ODNjIiBzdHJva2Utd2lkdGg9IjciIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPjxwYXRoIGQ9Ik0wLTVDLTQyLTUtNDktMzktNDAtNDItMTQtNDYgMC0yNCAwLTUiIGZpbGw9IiM2ZGE2NDYiLz48cGF0aCBkPSJNMC0xN0MzNS01MiA1OC0zNiAzOS0xNSAyMyAyIDMtNSAwLTE3IiBmaWxsPSIjYThjOTY5Ii8+PC9nPjxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDI1MCAzODkpIHNjYWxlKDAuNykiPjxwYXRoIGQ9Ik0wIDIwVi0yNSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMjM1ODNjIiBzdHJva2Utd2lkdGg9IjciIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPjxwYXRoIGQ9Ik0wLTVDLTQyLTUtNDktMzktNDAtNDItMTQtNDYgMC0yNCAwLTUiIGZpbGw9IiM2ZGE2NDYiLz48cGF0aCBkPSJNMC0xN0MzNS01MiA1OC0zNiAzOS0xNSAyMyAyIDMtNSAwLTE3IiBmaWxsPSIjYThjOTY5Ii8+PC9nPjxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDUzNSAzODkpIHNjYWxlKDAuNykiPjxwYXRoIGQ9Ik0wIDIwVi0yNSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMjM1ODNjIiBzdHJva2Utd2lkdGg9IjciIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPjxwYXRoIGQ9Ik0wLTVDLTQyLTUtNDktMzktNDAtNDItMTQtNDYgMC0yNCAwLTUiIGZpbGw9IiM2ZGE2NDYiLz48cGF0aCBkPSJNMC0xN0MzNS01MiA1OC0zNiAzOS0xNSAyMyAyIDMtNSAwLTE3IiBmaWxsPSIjYThjOTY5Ii8+PC9nPjxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDYxNSAzODkpIHNjYWxlKDAuNykiPjxwYXRoIGQ9Ik0wIDIwVi0yNSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMjM1ODNjIiBzdHJva2Utd2lkdGg9IjciIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPjxwYXRoIGQ9Ik0wLTVDLTQyLTUtNDktMzktNDAtNDItMTQtNDYgMC0yNCAwLTUiIGZpbGw9IiM2ZGE2NDYiLz48cGF0aCBkPSJNMC0xN0MzNS01MiA1OC0zNiAzOS0xNSAyMyAyIDMtNSAwLTE3IiBmaWxsPSIjYThjOTY5Ii8+PC9nPjxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDY5NSAzODkpIHNjYWxlKDAuNykiPjxwYXRoIGQ9Ik0wIDIwVi0yNSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMjM1ODNjIiBzdHJva2Utd2lkdGg9IjciIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPjxwYXRoIGQ9Ik0wLTVDLTQyLTUtNDktMzktNDAtNDItMTQtNDYgMC0yNCAwLTUiIGZpbGw9IiM2ZGE2NDYiLz48cGF0aCBkPSJNMC0xN0MzNS01MiA1OC0zNiAzOS0xNSAyMyAyIDMtNSAwLTE3IiBmaWxsPSIjYThjOTY5Ii8+PC9nPjxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDY1IDUzMCkgc2NhbGUoMSkiPjxwYXRoIGQ9Ik0wIDIwVi0yNSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMjM1ODNjIiBzdHJva2Utd2lkdGg9IjciIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPjxwYXRoIGQ9Ik0wLTVDLTQyLTUtNDktMzktNDAtNDItMTQtNDYgMC0yNCAwLTUiIGZpbGw9IiM2ZGE2NDYiLz48cGF0aCBkPSJNMC0xN0MzNS01MiA1OC0zNiAzOS0xNSAyMyAyIDMtNSAwLTE3IiBmaWxsPSIjYThjOTY5Ii8+PC9nPjxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDE1NSA1MzApIHNjYWxlKDEpIj48cGF0aCBkPSJNMCAyMFYtMjUiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzIzNTgzYyIgc3Ryb2tlLXdpZHRoPSI3IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48cGF0aCBkPSJNMC01Qy00Mi01LTQ5LTM5LTQwLTQyLTE0LTQ2IDAtMjQgMC01IiBmaWxsPSIjNmRhNjQ2Ii8+PHBhdGggZD0iTTAtMTdDMzUtNTIgNTgtMzYgMzktMTUgMjMgMiAzLTUgMC0xNyIgZmlsbD0iI2E4Yzk2OSIvPjwvZz48ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSg2MDUgNTMwKSBzY2FsZSgxKSI+PHBhdGggZD0iTTAgMjBWLTI1IiBmaWxsPSJub25lIiBzdHJva2U9IiMyMzU4M2MiIHN0cm9rZS13aWR0aD0iNyIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+PHBhdGggZD0iTTAtNUMtNDItNS00OS0zOS00MC00Mi0xNC00NiAwLTI0IDAtNSIgZmlsbD0iIzZkYTY0NiIvPjxwYXRoIGQ9Ik0wLTE3QzM1LTUyIDU4LTM2IDM5LTE1IDIzIDIgMy01IDAtMTciIGZpbGw9IiNhOGM5NjkiLz48L2c+PGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoNzAwIDUzMCkgc2NhbGUoMSkiPjxwYXRoIGQ9Ik0wIDIwVi0yNSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMjM1ODNjIiBzdHJva2Utd2lkdGg9IjciIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPjxwYXRoIGQ9Ik0wLTVDLTQyLTUtNDktMzktNDAtNDItMTQtNDYgMC0yNCAwLTUiIGZpbGw9IiM2ZGE2NDYiLz48cGF0aCBkPSJNMC0xN0MzNS01MiA1OC0zNiAzOS0xNSAyMyAyIDMtNSAwLTE3IiBmaWxsPSIjYThjOTY5Ii8+PC9nPjxwYXRoIGQ9Ik01NSAxODBWMzEwTTE2MCAxODBWMzEwTTU1IDIwMEgxNjBNNTUgMjM1SDE2MCIgc3Ryb2tlPSIjZjVlOWNlIiBzdHJva2Utd2lkdGg9IjEyIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48cGF0aCBkPSJNNTE4IDIzOGgxOTB2NjZINTE4WiIgZmlsbD0iI2U4ZDhiMyIvPjxwYXRoIGQ9Ik00OTQgMjM5bDEyMC05NCAxMjAgOTQiIGZpbGw9IiMzZDYzNTAiLz48L3N2Zz4=" alt="Kebun produktif dengan petak tanaman dan bibit hijau" width="800" height="620" decoding="async">
+     </div>
+    </section>
+    <section class="slide" aria-label="Slide 2: Tujuan pembelajaran">
+     <p data-template-id="goals-kicker" class="canva-text eyebrow">Kegiatan belajar</p>
+     <h2 data-template-id="goals-title" class="canva-text">Tujuan pembelajaran</h2>
+     <p data-template-id="goals-description" class="canva-text lead">Setelah belajar, kamu dapat memahami dan menyelesaikan PLSV.</p>
+     <div class="cards">
+      <article data-template-id="goal-card-one" class="canva-card card"><strong data-template-id="goal-one-title" class="canva-text">Mengenali</strong>
+       <p data-template-id="goal-one-body" class="canva-text">Mengidentifikasi variabel dan bentuk PLSV.</p>
+      </article>
+      <article data-template-id="goal-card-two" class="canva-card card"><strong data-template-id="goal-two-title" class="canva-text">Menyelesaikan</strong>
+       <p data-template-id="goal-two-body" class="canva-text">Menggunakan operasi setara pada kedua ruas.</p>
+      </article>
+      <article data-template-id="goal-card-three" class="canva-card card"><strong data-template-id="goal-three-title" class="canva-text">Menerapkan</strong>
+       <p data-template-id="goal-three-body" class="canva-text">Menyelesaikan masalah sehari-hari dengan PLSV.</p>
+      </article>
+     </div>
+    </section>
+    <section class="slide" aria-label="Slide 3: Manfaat pembelajaran">
+     <p data-template-id="benefits-kicker" class="canva-text eyebrow">Kegiatan belajar</p>
+     <h2 data-template-id="benefits-title" class="canva-text">Mengapa kita belajar PLSV?</h2>
+     <p data-template-id="benefits-description" class="canva-text lead">Persamaan membantu kita menentukan nilai yang belum diketahui.</p>
+     <div class="cards">
+      <article data-template-id="benefit-card-one" class="canva-card card"><strong data-template-id="benefit-one-title" class="canva-text">Anggaran</strong>
+       <p data-template-id="benefit-one-body" class="canva-text">Menghitung harga barang yang belum diketahui.</p>
+      </article>
+      <article data-template-id="benefit-card-two" class="canva-card card"><strong data-template-id="benefit-two-title" class="canva-text">Perencanaan</strong>
+       <p data-template-id="benefit-two-body" class="canva-text">Menentukan jumlah kebutuhan kebun.</p>
+      </article>
+      <article data-template-id="benefit-card-three" class="canva-card card"><strong data-template-id="benefit-three-title" class="canva-text">Penalaran</strong>
+       <p data-template-id="benefit-three-body" class="canva-text">Memeriksa langkah dan kebenaran hasil.</p>
+      </article>
+     </div>
+    </section>
+    <section class="slide" aria-label="Slide 4: Pertanyaan pemantik">
+     <p data-template-id="prompt-kicker" class="canva-text eyebrow">Kegiatan belajar</p>
+     <h2 data-template-id="prompt-title" class="canva-text">Berapa isi setiap baki?</h2>
+     <p data-template-id="prompt-question" class="canva-text lead">Tiga baki masing-masing berisi jumlah bibit yang sama. Ada 6 bibit di luar baki. Jika seluruhnya 21 bibit, berapa bibit dalam setiap baki?</p>
+     <p data-template-id="prompt-note" class="canva-text note">Misalkan x adalah banyak bibit dalam satu baki. Bagaimana bentuk persamaannya?</p>
+    </section>
+    <section class="slide" aria-label="Slide 5: Eksplorasi timbangan">
+     <p data-template-id="explore-kicker" class="canva-text eyebrow">Kegiatan belajar</p>
+     <h2 data-template-id="explore-title" class="canva-text">Menjaga timbangan seimbang</h2>
+     <p data-template-id="explore-description" class="canva-text lead">Anggap setiap bibit memiliki berat yang sama. Tambah atau kurangi jumlah bibit pada kedua piring.</p>
+     <div data-template-id="explore-panel" class="canva-panel scale-panel">
+      <div class="scale-art" aria-hidden="true">
+       <div id="explore-moving" class="scale-moving">
+        <div class="scale-beam"></div>
+        <div class="scale-pan left">
+         <div class="pan-bowl"><span id="left-count">0 bibit</span>
+         </div>
+        </div>
+        <div class="scale-pan right">
+         <div class="pan-bowl"><span id="right-count">0 bibit</span>
+         </div>
+        </div>
+       </div>
+       <div class="pivot"></div>
+       <div class="base"></div>
+      </div>
+      <div class="scale-controls">
+       <div class="control-group">
+        <p data-template-id="explore-left-label" class="canva-text">Piring kiri</p>
+        <div class="button-row">
+         <button id="left-minus" type="button" data-template-id="left-minus-button" class="canva-button action secondary" aria-label="Kurangi satu bibit di piring kiri">− 1 bibit</button> <button id="left-plus" type="button" data-template-id="left-plus-button" class="canva-button action" aria-label="Tambah satu bibit di piring kiri">+ 1 bibit</button>
+        </div>
+       </div>
+       <div class="control-group">
+        <p data-template-id="explore-right-label" class="canva-text">Piring kanan</p>
+        <div class="button-row">
+         <button id="right-minus" type="button" data-template-id="right-minus-button" class="canva-button action secondary" aria-label="Kurangi satu bibit di piring kanan">− 1 bibit</button> <button id="right-plus" type="button" data-template-id="right-plus-button" class="canva-button action" aria-label="Tambah satu bibit di piring kanan">+ 1 bibit</button>
+        </div>
+       </div>
+      </div>
+     </div>
+     <p id="balance-status" class="status" role="status" aria-live="polite"></p><button id="clear-scale" type="button" data-template-id="clear-scale-button" class="canva-button action secondary mt-3 self-start">Ulangi timbangan</button>
+    </section>
+    <section class="slide" aria-label="Slide 6: Definisi PLSV">
+     <p data-template-id="intro-kicker" class="canva-text eyebrow">Kegiatan belajar</p>
+     <h2 data-template-id="intro-title" class="canva-text">Apa itu PLSV?</h2>
+     <p data-template-id="intro-description" class="canva-text lead">Buka setiap kartu untuk mengenali unsur persamaan.</p>
+     <div class="cards" id="intro-questions">
+      <article data-template-id="intro-card" class="canva-card card question-card" tabindex="0" role="button" aria-expanded="false" aria-controls="intro-answer-one"><strong data-template-id="intro-card-title" class="canva-text">Apa itu persamaan?</strong>
+       <p id="intro-answer-one" data-template-id="intro-card-body" class="canva-text question-answer" hidden>Pernyataan matematika yang menggunakan tanda sama dengan (=).</p>
+      </article>
+      <article data-template-id="intro-card-two" class="canva-card card question-card" tabindex="0" role="button" aria-expanded="false" aria-controls="intro-answer-two"><strong data-template-id="intro-card-two-title" class="canva-text">Apa itu satu variabel?</strong>
+       <p id="intro-answer-two" data-template-id="intro-card-two-body" class="canva-text question-answer" hidden>Hanya ada satu jenis variabel, misalnya x.</p>
+      </article>
+      <article data-template-id="intro-card-three" class="canva-card card question-card" tabindex="0" role="button" aria-expanded="false" aria-controls="intro-answer-three"><strong data-template-id="intro-card-three-title" class="canva-text">Apa itu linear?</strong>
+       <p id="intro-answer-three" data-template-id="intro-card-three-body" class="canva-text question-answer" hidden>Pangkat tertinggi variabelnya satu.</p>
+      </article>
+     </div><button id="show-conclusion" type="button" data-template-id="show-conclusion-button" class="canva-button action secondary reveal-conclusion" hidden>Tampilkan kesimpulan</button>
+     <p id="intro-conclusion" data-template-id="intro-conclusion" class="canva-text note" style="margin-top:18px" hidden>PLSV adalah persamaan dengan satu variabel berpangkat satu. Bentuk umum: ax + b = 0, dengan a ≠ 0.</p>
+    </section>
+    <section class="slide" aria-label="Slide 7: Menyelesaikan persamaan dengan timbangan">
+     <p data-template-id="solve-kicker" class="canva-text eyebrow">Kegiatan belajar</p>
+     <h2 data-template-id="solve-title" class="canva-text">Operasi yang sama pada kedua ruas</h2>
+     <p data-template-id="solve-description" class="canva-text lead">Selesaikan 3x + 6 = 21, lalu periksa nilai x.</p>
+     <div data-template-id="solve-panel" class="canva-panel scale-panel">
+      <div class="scale-art" aria-hidden="true">
+       <div class="scale-moving">
+        <div class="scale-beam"></div>
+        <div class="scale-pan left">
+         <div class="pan-bowl">
+          <span class="solve-stage stage-0" data-template-id="solve-left-zero">3x + 6</span> <span class="solve-stage stage-1" data-template-id="solve-left-one" hidden>3x</span> <span class="solve-stage stage-2" data-template-id="solve-left-two" hidden>x</span>
+         </div>
+        </div>
+        <div class="scale-pan right">
+         <div class="pan-bowl">
+          <span class="solve-stage stage-0" data-template-id="solve-right-zero">21</span> <span class="solve-stage stage-1" data-template-id="solve-right-one" hidden>15</span> <span class="solve-stage stage-2" data-template-id="solve-right-two" hidden>5</span>
+         </div>
+        </div>
+       </div>
+       <div class="pivot"></div>
+       <div class="base"></div>
+      </div>
+     </div>
+     <div aria-live="polite">
+      <p class="solve-stage stage-0 formula" data-template-id="solve-equation-zero">3x + 6 = 21</p>
+      <p class="solve-stage stage-1 formula" data-template-id="solve-equation-one" hidden>3x = 15</p>
+      <p class="solve-stage stage-2 formula" data-template-id="solve-equation-two" hidden>x = 5</p>
+     </div>
+     <p class="solve-stage stage-0 worked" data-template-id="solve-explain-zero">Kurangi kedua ruas dengan 6.</p>
+     <p class="solve-stage stage-1 worked" data-template-id="solve-explain-one" hidden>Bagi kedua ruas dengan 3.</p>
+     <p class="solve-stage stage-2 worked" data-template-id="solve-explain-two" hidden>Periksa: 3 × 5 + 6 = 21. Jadi, setiap baki berisi 5 bibit.</p>
+     <div class="step-row">
+      <button id="subtract" type="button" data-template-id="subtract-button" class="canva-button action">Kurangi kedua ruas dengan 6</button> <button id="divide" type="button" data-template-id="divide-button" class="canva-button action" disabled>Bagi kedua ruas dengan 3</button> <button id="reset-solution" type="button" data-template-id="reset-solution-button" class="canva-button action secondary">Ulangi contoh</button>
+     </div>
+    </section>
+    <section class="slide" aria-label="Slide 8: Laboratorium PLSV">
+     <p data-template-id="lab-kicker" class="canva-text eyebrow">Kegiatan belajar</p>
+     <h2 data-template-id="lab-title" class="canva-text">Laboratorium PLSV</h2>
+     <p data-template-id="lab-description" class="canva-text lead">Pilih soal dan terapkan operasi yang sama pada kedua ruas. Untuk tambah/kurang, isi koefisien x dan bilangan; untuk kali/bagi, cukup isi bilangan.</p>
+     <div class="lab-types" role="group" aria-label="Pilih tipe soal"><button id="lab-type-one" data-template-id="lab-type-one" type="button" class="canva-button lab-type active">Tipe 1 · x satu ruas</button> <button id="lab-type-two" data-template-id="lab-type-two" type="button" class="canva-button lab-type">Tipe 2 · variabel dua ruas</button> <button id="lab-type-three" data-template-id="lab-type-three" type="button" class="canva-button lab-type">Tipe 3 · perkalian</button>
+     </div>
+     <div data-template-id="lab-card" class="canva-card lab-card">
+      <p id="lab-equation" data-template-id="lab-equation" class="canva-text lab-equation" aria-live="polite"></p>
+      <div class="lab-scale" aria-label="Ilustrasi timbangan persamaan aktif">
+       <div id="lab-scale-moving" class="lab-scale-moving">
+        <div class="lab-scale-beam"></div>
+        <div class="lab-scale-pan left">
+         <div id="lab-left-bowl" class="lab-pan-bowl"></div>
+        </div>
+        <div class="lab-scale-pan right">
+         <div id="lab-right-bowl" class="lab-pan-bowl"></div>
+        </div>
+       </div>
+       <div class="lab-pivot"></div>
+       <div class="lab-base"></div>
+      </div>
+      <div class="lab-controls" role="group" aria-label="Jenis operasi">
+       <button id="lab-add" data-template-id="lab-add" type="button" class="canva-button">+ Tambah</button> <button id="lab-subtract" data-template-id="lab-subtract" type="button" class="canva-button active">− Kurangi</button> <button id="lab-divide" data-template-id="lab-divide" type="button" class="canva-button">÷ Bagi</button> <button id="lab-multiply" data-template-id="lab-multiply" type="button" class="canva-button">× Kali</button>
+      </div>
+      <form id="lab-form" class="lab-inputs">
+       <label data-template-id="lab-x-label" class="canva-text" for="lab-x-value">Koefisien x</label> <input required id="lab-x-value" type="number" value="0" min="-100" max="100" step="any"> <label data-template-id="lab-value-label" class="canva-text" for="lab-value">Bilangan</label> <input id="lab-value" type="number" value="2" min="-100" max="100" step="any" required> <button data-template-id="lab-apply" type="submit" class="canva-button">Terapkan pada kedua ruas</button>
+      </form>
+      <p id="lab-hint" data-template-id="lab-hint" class="canva-text" role="status" aria-live="polite"></p>
+      <h3 data-template-id="lab-history-title" class="canva-text">Langkahmu</h3>
+      <ol id="lab-history" class="lab-steps"></ol>
+     </div>
+    </section>
+    <section class="slide" aria-label="Slide 9: Soal HOTS anggaran">
+     <p data-template-id="problem-one-kicker" class="canva-text eyebrow">Kegiatan belajar</p>
+     <h2 data-template-id="problem-one-title" class="canva-text">Merencanakan anggaran kebun</h2>
+     <div class="problem-layout">
+      <div>
+       <p data-template-id="problem-one-story" class="canva-text lead">Kelas membeli 4 kantong tanah dengan harga yang sama dan membayar ongkos kirim Rp8.000. Total pembayaran Rp48.000. Berapa harga satu kantong tanah?</p><button type="button" class="action solution-toggle" aria-expanded="false" aria-controls="solution-one"> <span data-template-id="problem-one-show" class="canva-text">Tampilkan pembahasan</span> <span data-template-id="problem-one-hide" class="canva-text" hidden>Sembunyikan pembahasan</span> </button>
+      </div><img data-template-id="soil-photo" class="canva-image problem-photo" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4MDAiIGhlaWdodD0iNjIwIiB2aWV3Qm94PSIwIDAgODAwIDYyMCI+PGRlZnM+PGxpbmVhckdyYWRpZW50IGlkPSJza3kiIHgyPSIwIiB5Mj0iMSI+PHN0b3Agc3RvcC1jb2xvcj0iI2Q5ZTlkYiIvPjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iI2Y4ZjNkOCIvPjwvbGluZWFyR3JhZGllbnQ+PGxpbmVhckdyYWRpZW50IGlkPSJzb2lsIiB4Mj0iMCIgeTI9IjEiPjxzdG9wIHN0b3AtY29sb3I9IiM5NzczNGEiLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiM2MzQ2MmYiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz48cmVjdCB3aWR0aD0iODAwIiBoZWlnaHQ9IjYyMCIgZmlsbD0iI2U3ZWRkYiIvPjxlbGxpcHNlIGN4PSI0MTAiIGN5PSI1NDIiIHJ4PSIzMjEiIHJ5PSIzMyIgZmlsbD0iI2M1Y2RiMSIvPjxwYXRoIGQ9Ik04NyAyMDBoMTg4bDIzIDMyOEg2N1oiIGZpbGw9IiNjZmI1ODYiLz48cGF0aCBkPSJNODIgMjAycTk4LTQ2IDE5OCAwbC0xNiA0MEg5NFoiIGZpbGw9IiM3MzUwMzYiLz48cGF0aCBkPSJNMzIxIDE3MWgxODVsMjYgMzU3SDMwMloiIGZpbGw9IiNkZmM3OTkiLz48cGF0aCBkPSJNMzE1IDE3NHExMDQtNDYgMTk4IDBsLTE2IDQ0SDMyN1oiIGZpbGw9IiM3MzUwMzYiLz48cGF0aCBkPSJNNTYwIDIyNWgxNTdsMjEgMzAzSDU0MloiIGZpbGw9IiNiZGE0NzciLz48cGF0aCBkPSJNNTU0IDIyOXE4OS00MCAxNjkgMGwtMTcgNDBINTY1WiIgZmlsbD0iIzczNTAzNiIvPjxwYXRoIGQ9Ik0xNTkgMjg3aDU4djExNmgtNTh6TTM4MiAyNjZoNTl2MTI2aC01OXpNNjA1IDMwN2g1M3YxMDhoLTUzeiIgZmlsbD0iI2Y4ZjVlOSIvPjxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDE4NyAzNjApIHNjYWxlKDAuNikiPjxwYXRoIGQ9Ik0wIDIwVi0yNSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMjM1ODNjIiBzdHJva2Utd2lkdGg9IjciIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPjxwYXRoIGQ9Ik0wLTVDLTQyLTUtNDktMzktNDAtNDItMTQtNDYgMC0yNCAwLTUiIGZpbGw9IiM2ZGE2NDYiLz48cGF0aCBkPSJNMC0xN0MzNS01MiA1OC0zNiAzOS0xNSAyMyAyIDMtNSAwLTE3IiBmaWxsPSIjYThjOTY5Ii8+PC9nPjxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDQxMiAzNDApIHNjYWxlKDAuNikiPjxwYXRoIGQ9Ik0wIDIwVi0yNSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMjM1ODNjIiBzdHJva2Utd2lkdGg9IjciIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPjxwYXRoIGQ9Ik0wLTVDLTQyLTUtNDktMzktNDAtNDItMTQtNDYgMC0yNCAwLTUiIGZpbGw9IiM2ZGE2NDYiLz48cGF0aCBkPSJNMC0xN0MzNS01MiA1OC0zNiAzOS0xNSAyMyAyIDMtNSAwLTE3IiBmaWxsPSIjYThjOTY5Ii8+PC9nPjxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDYzMCAzNzcpIHNjYWxlKDAuNTUpIj48cGF0aCBkPSJNMCAyMFYtMjUiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzIzNTgzYyIgc3Ryb2tlLXdpZHRoPSI3IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48cGF0aCBkPSJNMC01Qy00Mi01LTQ5LTM5LTQwLTQyLTE0LTQ2IDAtMjQgMC01IiBmaWxsPSIjNmRhNjQ2Ii8+PHBhdGggZD0iTTAtMTdDMzUtNTIgNTgtMzYgMzktMTUgMjMgMiAzLTUgMC0xNyIgZmlsbD0iI2E4Yzk2OSIvPjwvZz48cGF0aCBkPSJNOTUgNTMzcTU2LTg4IDE0OCAwIiBmaWxsPSIjNzM1MDM2Ii8+PC9zdmc+" alt="Tiga kantong tanah untuk kegiatan berkebun" width="800" height="620" decoding="async">
+     </div>
+     <div id="solution-one" data-template-id="solution-one-panel" class="canva-panel solution" hidden>
+      <p data-template-id="problem-one-step-a" class="canva-text">Misalkan x adalah harga satu kantong tanah.</p>
+      <p data-template-id="problem-one-step-b" class="canva-text">4x + 8.000 = 48.000</p>
+      <p data-template-id="problem-one-step-c" class="canva-text">4x = 40.000, sehingga x = 10.000.</p>
+      <p data-template-id="problem-one-step-d" class="canva-text">Periksa: 4 × Rp10.000 + Rp8.000 = Rp48.000.</p>
+     </div>
+    </section>
+    <section class="slide" aria-label="Slide 10: Soal HOTS perbandingan">
+     <p data-template-id="problem-two-kicker" class="canva-text eyebrow">Kegiatan belajar</p>
+     <h2 data-template-id="problem-two-title" class="canva-text">Membandingkan jumlah bibit</h2>
+     <div class="problem-layout">
+      <div>
+       <p data-template-id="problem-two-story" class="canva-text lead">Setiap baki berisi x bibit. Kelompok A memiliki 3 baki dan 6 bibit di luar baki. Kelompok B memiliki 2 baki dan 14 bibit di luar baki. Jumlah bibit kedua kelompok sama. Berapa isi satu baki?</p><button type="button" class="action solution-toggle" aria-expanded="false" aria-controls="solution-two"> <span data-template-id="problem-two-show" class="canva-text">Tampilkan pembahasan</span> <span data-template-id="problem-two-hide" class="canva-text" hidden>Sembunyikan pembahasan</span> </button>
+      </div><img data-template-id="seedling-photo" class="canva-image problem-photo" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4MDAiIGhlaWdodD0iNjIwIiB2aWV3Qm94PSIwIDAgODAwIDYyMCI+PGRlZnM+PGxpbmVhckdyYWRpZW50IGlkPSJza3kiIHgyPSIwIiB5Mj0iMSI+PHN0b3Agc3RvcC1jb2xvcj0iI2Q5ZTlkYiIvPjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iI2Y4ZjNkOCIvPjwvbGluZWFyR3JhZGllbnQ+PGxpbmVhckdyYWRpZW50IGlkPSJzb2lsIiB4Mj0iMCIgeTI9IjEiPjxzdG9wIHN0b3AtY29sb3I9IiM5NzczNGEiLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiM2MzQ2MmYiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz48cmVjdCB3aWR0aD0iODAwIiBoZWlnaHQ9IjYyMCIgZmlsbD0idXJsKCNza3kpIi8+PGVsbGlwc2UgY3g9IjM5OSIgY3k9IjUyNSIgcng9IjMzMCIgcnk9IjM4IiBmaWxsPSIjYzJkMWFjIi8+PHBhdGggZD0iTTkxIDM0Mmg2MTlsLTUwIDE4MEgxNDVaIiBmaWxsPSIjMzQ1ZDQ4Ii8+PHBhdGggZD0iTTkxIDM0Mmw3Ny05N2g0NzVsNjcgOTdaIiBmaWxsPSIjNTY3OTYxIi8+PGVsbGlwc2UgY3g9IjIxNCIgY3k9IjI4MyIgcng9IjU2IiByeT0iMjUiIGZpbGw9IiM1NjNjMmEiIHN0cm9rZT0iIzhkOWI3MCIgc3Ryb2tlLXdpZHRoPSI1Ii8+PGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjE0IDI3MSkgc2NhbGUoMC45KSI+PHBhdGggZD0iTTAgMjBWLTI1IiBmaWxsPSJub25lIiBzdHJva2U9IiMyMzU4M2MiIHN0cm9rZS13aWR0aD0iNyIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+PHBhdGggZD0iTTAtNUMtNDItNS00OS0zOS00MC00Mi0xNC00NiAwLTI0IDAtNSIgZmlsbD0iIzZkYTY0NiIvPjxwYXRoIGQ9Ik0wLTE3QzM1LTUyIDU4LTM2IDM5LTE1IDIzIDIgMy01IDAtMTciIGZpbGw9IiNhOGM5NjkiLz48L2c+PGVsbGlwc2UgY3g9IjM5MyIgY3k9IjI4MyIgcng9IjU2IiByeT0iMjUiIGZpbGw9IiM1NjNjMmEiIHN0cm9rZT0iIzhkOWI3MCIgc3Ryb2tlLXdpZHRoPSI1Ii8+PGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMzkzIDI3MSkgc2NhbGUoMC45KSI+PHBhdGggZD0iTTAgMjBWLTI1IiBmaWxsPSJub25lIiBzdHJva2U9IiMyMzU4M2MiIHN0cm9rZS13aWR0aD0iNyIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+PHBhdGggZD0iTTAtNUMtNDItNS00OS0zOS00MC00Mi0xNC00NiAwLTI0IDAtNSIgZmlsbD0iIzZkYTY0NiIvPjxwYXRoIGQ9Ik0wLTE3QzM1LTUyIDU4LTM2IDM5LTE1IDIzIDIgMy01IDAtMTciIGZpbGw9IiNhOGM5NjkiLz48L2c+PGVsbGlwc2UgY3g9IjU3MCIgY3k9IjI4MyIgcng9IjU2IiByeT0iMjUiIGZpbGw9IiM1NjNjMmEiIHN0cm9rZT0iIzhkOWI3MCIgc3Ryb2tlLXdpZHRoPSI1Ii8+PGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoNTcwIDI3MSkgc2NhbGUoMC45KSI+PHBhdGggZD0iTTAgMjBWLTI1IiBmaWxsPSJub25lIiBzdHJva2U9IiMyMzU4M2MiIHN0cm9rZS13aWR0aD0iNyIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+PHBhdGggZD0iTTAtNUMtNDItNS00OS0zOS00MC00Mi0xNC00NiAwLTI0IDAtNSIgZmlsbD0iIzZkYTY0NiIvPjxwYXRoIGQ9Ik0wLTE3QzM1LTUyIDU4LTM2IDM5LTE1IDIzIDIgMy01IDAtMTciIGZpbGw9IiNhOGM5NjkiLz48L2c+PGVsbGlwc2UgY3g9IjE4NCIgY3k9IjM0MSIgcng9IjU2IiByeT0iMjUiIGZpbGw9IiM1NjNjMmEiIHN0cm9rZT0iIzhkOWI3MCIgc3Ryb2tlLXdpZHRoPSI1Ii8+PGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTg0IDMyOSkgc2NhbGUoMS4xKSI+PHBhdGggZD0iTTAgMjBWLTI1IiBmaWxsPSJub25lIiBzdHJva2U9IiMyMzU4M2MiIHN0cm9rZS13aWR0aD0iNyIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+PHBhdGggZD0iTTAtNUMtNDItNS00OS0zOS00MC00Mi0xNC00NiAwLTI0IDAtNSIgZmlsbD0iIzZkYTY0NiIvPjxwYXRoIGQ9Ik0wLTE3QzM1LTUyIDU4LTM2IDM5LTE1IDIzIDIgMy01IDAtMTciIGZpbGw9IiNhOGM5NjkiLz48L2c+PGVsbGlwc2UgY3g9IjM5MyIgY3k9IjM0MSIgcng9IjU2IiByeT0iMjUiIGZpbGw9IiM1NjNjMmEiIHN0cm9rZT0iIzhkOWI3MCIgc3Ryb2tlLXdpZHRoPSI1Ii8+PGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMzkzIDMyOSkgc2NhbGUoMS4xKSI+PHBhdGggZD0iTTAgMjBWLTI1IiBmaWxsPSJub25lIiBzdHJva2U9IiMyMzU4M2MiIHN0cm9rZS13aWR0aD0iNyIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+PHBhdGggZD0iTTAtNUMtNDItNS00OS0zOS00MC00Mi0xNC00NiAwLTI0IDAtNSIgZmlsbD0iIzZkYTY0NiIvPjxwYXRoIGQ9Ik0wLTE3QzM1LTUyIDU4LTM2IDM5LTE1IDIzIDIgMy01IDAtMTciIGZpbGw9IiNhOGM5NjkiLz48L2c+PGVsbGlwc2UgY3g9IjYwMyIgY3k9IjM0MSIgcng9IjU2IiByeT0iMjUiIGZpbGw9IiM1NjNjMmEiIHN0cm9rZT0iIzhkOWI3MCIgc3Ryb2tlLXdpZHRoPSI1Ii8+PGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoNjAzIDMyOSkgc2NhbGUoMS4xKSI+PHBhdGggZD0iTTAgMjBWLTI1IiBmaWxsPSJub25lIiBzdHJva2U9IiMyMzU4M2MiIHN0cm9rZS13aWR0aD0iNyIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+PHBhdGggZD0iTTAtNUMtNDItNS00OS0zOS00MC00Mi0xNC00NiAwLTI0IDAtNSIgZmlsbD0iIzZkYTY0NiIvPjxwYXRoIGQ9Ik0wLTE3QzM1LTUyIDU4LTM2IDM5LTE1IDIzIDIgMy01IDAtMTciIGZpbGw9IiNhOGM5NjkiLz48L2c+PHBhdGggZD0iTTE4MCAzOTdoNDQwTTE2NCA0NTNoNDcwTTMwOSAzNTVsMTMgMTUxTTQ5MyAzNTVsLTEyIDE1MSIgc3Ryb2tlPSIjNzM5MDZmIiBzdHJva2Utd2lkdGg9IjUiLz48L3N2Zz4=" alt="Bibit hijau di dalam baki persemaian" width="800" height="620" decoding="async">
+     </div>
+     <div id="solution-two" data-template-id="solution-two-panel" class="canva-panel solution" hidden>
+      <p data-template-id="problem-two-step-a" class="canva-text">Model: 3x + 6 = 2x + 14.</p>
+      <p data-template-id="problem-two-step-b" class="canva-text">Kurangi kedua ruas dengan 2x: x + 6 = 14.</p>
+      <p data-template-id="problem-two-step-c" class="canva-text">Kurangi kedua ruas dengan 6: x = 8.</p>
+      <p data-template-id="problem-two-step-d" class="canva-text">Periksa: 3 × 8 + 6 = 2 × 8 + 14 = 30 bibit.</p>
+     </div>
+    </section>
+    <section class="slide" aria-label="Slide 11: Asesmen formatif">
+     <p data-template-id="assessment-kicker" class="canva-text eyebrow">Kegiatan belajar</p>
+     <h2 data-template-id="assessment-title" class="canva-text">Saatnya mencoba sendiri</h2>
+     <p data-template-id="assessment-description" class="canva-text lead">Kerjakan latihan untuk memeriksa pemahamanmu.</p>
+     <div data-template-id="assessment-panel" class="canva-panel solution">
+      <p data-template-id="assessment-instruction" class="canva-text">Buka aktivitas Wordwall di tab baru. Tautan memerlukan koneksi internet.</p><a data-template-id="assessment-link" class="canva-link action" href="https://wordwall.net/resource/122276835?wwmethod=link" target="_blank" rel="noopener noreferrer">Buka latihan Wordwall ↗</a>
+     </div>
+    </section>
+    <section class="slide" aria-label="Slide 12: Yang sudah dipelajari">
+     <p data-template-id="learned-kicker" class="canva-text eyebrow">Kegiatan belajar</p>
+     <h2 data-template-id="learned-title" class="canva-text">Apa yang sudah kamu pelajari?</h2>
+     <p data-template-id="learned-description" class="canva-text lead">Jelaskan dengan bahasamu sendiri.</p>
+     <div class="cards">
+      <article data-template-id="learned-card-one" class="canva-card card">
+       <strong data-template-id="learned-one-title" class="canva-text">Model matematika</strong>
+       <p data-template-id="learned-one-body" class="canva-text">Nyatakan informasi soal dalam sebuah persamaan.</p>
+      </article>
+      <article data-template-id="learned-card-two" class="canva-card card">
+       <strong data-template-id="learned-two-title" class="canva-text">Kesetaraan</strong>
+       <p data-template-id="learned-two-body" class="canva-text">Jaga kesetaraan dengan operasi yang sah.</p>
+      </article>
+      <article data-template-id="learned-card-three" class="canva-card card">
+       <strong data-template-id="learned-three-title" class="canva-text">Pemeriksaan</strong>
+       <p data-template-id="learned-three-body" class="canva-text">Substitusikan nilai x ke persamaan awal.</p>
+      </article>
+     </div>
+    </section>
+    <section class="slide" aria-label="Slide 13: Rangkuman materi">
+     <p data-template-id="summary-kicker" class="canva-text eyebrow">Kegiatan belajar</p>
+     <h2 data-template-id="summary-title" class="canva-text">Rangkuman PLSV</h2>
+     <p data-template-id="summary-description" class="canva-text lead">Ingat tiga hal berikut.</p>
+     <div data-template-id="summary-panel" class="canva-panel solution">
+      <p data-template-id="summary-point-one" class="canva-text">1. Gunakan variabel untuk menyatakan nilai yang belum diketahui.</p>
+      <p data-template-id="summary-point-two" class="canva-text">2. Terapkan operasi yang sama pada kedua ruas. Perkalian dan pembagian harus dengan bilangan bukan nol.</p>
+      <p data-template-id="summary-point-three" class="canva-text">3. Substitusikan hasil ke persamaan awal untuk memeriksanya.</p>
+     </div>
+    </section>
+    <section class="slide" aria-label="Slide 14: Motivasi dan materi selanjutnya">
+     <p data-template-id="next-topic-kicker" class="canva-text eyebrow">Kegiatan belajar</p>
+     <h2 data-template-id="next-topic-title" class="canva-text">Terus berlatih dan bertanya</h2>
+     <p data-template-id="next-topic-description" class="canva-text lead">Setiap langkah yang kamu pahami membuat soal berikutnya lebih mudah.</p>
+     <p data-template-id="next-topic-note" class="canva-text note">Materi selanjutnya: pertidaksamaan linear satu variabel (PtLSV).</p>
+    </section>
+   </main>
+   <footer class="bottom-bar">
+    <button id="previous" type="button" data-template-id="previous-button" class="canva-button nav-btn">← Sebelumnya</button>
+    <div class="progress-wrap" aria-label="Kemajuan presentasi">
+     <div class="progress-track">
+      <div id="progress-fill" class="progress-fill"></div>
+     </div><span id="progress-label" class="progress-label" aria-live="polite">1 dari 14</span>
+    </div><button id="next" type="button" data-template-id="next-button" class="canva-button nav-btn">Berikutnya →</button>
+   </footer>
+  </div>
+  <script>
+    (() => {
+    'use strict';
+    const slides = [...document.querySelectorAll('.slide')];
+    let current = 0;
+    function showSlide(index) {
+      if (index < 0 || index >= slides.length) return;
+      slides[current].classList.remove('active');
+      current = index;
+      slides[current].classList.add('active');
+      document.getElementById('top-count').textContent =
+        `${String(current + 1).padStart(2, '0')} / ${String(slides.length).padStart(2, '0')}`;
+      document.getElementById('progress-label').textContent = `${current + 1} dari ${slides.length}`;
+      document.getElementById('progress-fill').style.width = `${(current + 1) / slides.length * 100}%`;
+      document.getElementById('previous').disabled = current === 0;
+      document.getElementById('next').disabled = current === slides.length - 1;
+    }
+    document.getElementById('previous').addEventListener('click', () => showSlide(current - 1));
+    document.getElementById('next').addEventListener('click', () => showSlide(current + 1));
+
+    let left = 0, right = 0;
+    function renderScale() {
+      document.getElementById('left-count').textContent = `${left} bibit`;
+      document.getElementById('right-count').textContent = `${right} bibit`;
+      const difference = left - right;
+      document.getElementById('explore-moving').style.setProperty('--tilt',
+        `${Math.max(-9, Math.min(9, difference * -2.5))}deg`);
+      const status = difference === 0
+        ? `Seimbang! ${left} = ${right}. Kedua piring berisi jumlah bibit yang sama.`
+        : difference > 0
+          ? `Kiri lebih berat: ${left} > ${right}. Tambahkan ${difference} bibit ke kanan, atau kurangi ${difference} bibit dari kiri, agar seimbang.`
+          : `Kanan lebih berat: ${right} > ${left}. Tambahkan ${-difference} bibit ke kiri, atau kurangi ${-difference} bibit dari kanan, agar seimbang.`;
+      document.getElementById('balance-status').textContent = status;
+      document.getElementById('left-minus').disabled = left === 0;
+      document.getElementById('right-minus').disabled = right === 0;
+    }
+    document.getElementById('left-plus').addEventListener('click', () => { left++; renderScale(); });
+    document.getElementById('right-plus').addEventListener('click', () => { right++; renderScale(); });
+    document.getElementById('left-minus').addEventListener('click', () => { if (left) left--; renderScale(); });
+    document.getElementById('right-minus').addEventListener('click', () => { if (right) right--; renderScale(); });
+    document.getElementById('clear-scale').addEventListener('click', () => { left = 0; right = 0; renderScale(); });
+
+    
+    function showSolveStage(stage) {
+
+      document.querySelectorAll('.solve-stage').forEach(el => {
+        el.hidden = !el.classList.contains(`stage-${stage}`);
+      });
+      document.getElementById('subtract').disabled = stage !== 0;
+      document.getElementById('divide').disabled = stage !== 1;
+    }
+    document.getElementById('subtract').addEventListener('click', () => showSolveStage(1));
+    document.getElementById('divide').addEventListener('click', () => showSolveStage(2));
+    document.getElementById('reset-solution').addEventListener('click', () => showSolveStage(0));
+
+    const introCards = [...document.querySelectorAll('.question-card')];
+    const conclusionButton = document.getElementById('show-conclusion');
+    const conclusion = document.getElementById('intro-conclusion');
+    function toggleIntroCard(card) {
+      const answer = document.getElementById(card.getAttribute('aria-controls'));
+      const opening = answer.hidden;
+      answer.hidden = !opening;
+      card.classList.toggle('is-open', opening);
+      card.setAttribute('aria-expanded', String(opening));
+      conclusionButton.hidden = !conclusion.hidden || !introCards.every(item => item.getAttribute('aria-expanded') === 'true');
+    }
+    introCards.forEach(card => {
+      card.addEventListener('click', () => toggleIntroCard(card));
+      card.addEventListener('keydown', event => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          toggleIntroCard(card);
+        }
+      });
+    });
+    conclusionButton.addEventListener('click', () => {
+      conclusion.hidden = false;
+      conclusionButton.hidden = true;
+    });
+
+    document.querySelectorAll('.solution-toggle').forEach(button => {
+      button.addEventListener('click', () => {
+        const panel = document.getElementById(button.getAttribute('aria-controls'));
+        const opening = panel.hidden;
+        panel.hidden = !opening;
+        button.setAttribute('aria-expanded', String(opening));
+        button.querySelector('[data-template-id$="-show"]').hidden = opening;
+        button.querySelector('[data-template-id$="-hide"]').hidden = !opening;
+      });
+    });
+    // Each side stores its coefficient of x and its constant term.
+    const labProblems={
+      one:{left:{x:3,c:6},right:{x:0,c:21}},
+      two:{left:{x:3,c:6},right:{x:2,c:14}},
+      three:{left:{x:0.5,c:3},right:{x:0,c:9}}
+    };
+    
+    let labState;
+    const near = (a, b) => Math.abs(a - b) <= 1e-10 * Math.max(1, Math.abs(a), Math.abs(b));
+
+    function selectLabType(type) {
+      labState = {
+        left: {...labProblems[type].left},
+        right: {...labProblems[type].right},
+        op: 'subtract'
+      };
+      document.getElementById('lab-x-value').value='0';
+      document.getElementById('lab-value').value='2';
+      document.querySelectorAll('.lab-type').forEach(button=>button.classList.toggle('active',button.id===`lab-type-${type}`));
+      document.querySelectorAll('.lab-controls button').forEach(button=>button.classList.toggle('active',button.id==='lab-subtract'));
+      document.getElementById('lab-history').replaceChildren();
+      renderLab();
+    }
+    document.getElementById('lab-type-one').addEventListener('click',()=>selectLabType('one'));
+    document.getElementById('lab-type-two').addEventListener('click',()=>selectLabType('two'));
+    document.getElementById('lab-type-three').addEventListener('click',()=>selectLabType('three'));
+    // Keep full numeric precision in state; round only the displayed result.
+    function labExpr(side) {
+      const x = side.x, c = side.c;
+      const variable = x === 0 ? '' : x === 1 ? 'x' : x === -1 ? '−x' : `${formatNumber(x)}x`;
+      if (c === 0) return variable || '0';
+      return variable ? `${variable} ${c < 0 ? '−' : '+'} ${formatNumber(Math.abs(c))}` : formatNumber(c);
+    }
+    function formatNumber(value) {
+      return Number(value.toPrecision(12)).toLocaleString('id-ID', {maximumSignificantDigits:12, useGrouping:false});
+    }
+    function renderLab() {
+      const {left, right} = labState;
+      document.getElementById('lab-equation').textContent = `${labExpr(left)} = ${labExpr(right)}`;
+      document.getElementById('lab-left-bowl').textContent = labExpr(left);
+      document.getElementById('lab-right-bowl').textContent = labExpr(right);
+      document.getElementById('lab-scale-moving').style.transform = 'rotate(0deg)';
+      const solved = near(left.x,1) && near(left.c,0) && near(right.x,0);
+      document.getElementById('lab-hint').textContent = solved
+        ? `Nilai x ≈ ${formatNumber(right.c)}. Periksa dengan substitusi ke persamaan awal.`
+        : 'Kedua ruas tetap setara untuk nilai x yang memenuhi persamaan. Bentuk kedua ruas tidak harus sama.';
+      document.getElementById('lab-x-value').disabled = ['multiply','divide'].includes(labState.op);
+      document.querySelectorAll('.lab-controls button, .lab-type').forEach(button => {
+        button.setAttribute('aria-pressed', String(button.classList.contains('active')));
+      });
+    }
+    document.querySelectorAll('.lab-controls button').forEach(button=>button.addEventListener('click',()=>{
+      labState.op=button.id.replace('lab-','');
+      document.querySelectorAll('.lab-controls button').forEach(b=>b.classList.toggle('active',b===button));
+      renderLab();
+    }));
+    document.getElementById('lab-form').addEventListener('submit',event=>{
+      event.preventDefault();
+      const xInput = document.getElementById('lab-x-value');
+      const valueInput = document.getElementById('lab-value');
+      const xValue = xInput.disabled ? 0 : Number(xInput.value);
+      const value = Number(valueInput.value);
+      const hint = document.getElementById('lab-hint');
+      if (!event.currentTarget.reportValidity() || !Number.isFinite(xValue) || !Number.isFinite(value)) {
+        hint.textContent = 'Isi bilangan yang valid.';
+        return;
+      }
+      if (['divide','multiply'].includes(labState.op) && value === 0) {
+        hint.textContent = 'Gunakan bilangan bukan nol agar himpunan penyelesaian tetap sama.';
+        return;
+      }
+      const before = `${labExpr(labState.left)} = ${labExpr(labState.right)}`;
+      const candidate = [labState.left,labState.right].map(side => {
+        if (labState.op === 'divide') return {x:side.x/value,c:side.c/value};
+        if (labState.op === 'multiply') return {x:side.x*value,c:side.c*value};
+        const sign = labState.op === 'add' ? 1 : -1;
+        return {x:side.x+sign*xValue,c:side.c+sign*value};
+      });
+      if (candidate.some(side => [side.x,side.c].some(n => !Number.isFinite(n) || Math.abs(n)>1e12 || (n!==0 && Math.abs(n)<1e-12)))) {
+        hint.textContent = 'Hasil di luar batas ketelitian simulasi. Pilih operasi lain atau ulangi soal.';
+        return;
+      }
+      [labState.left,labState.right] = candidate;
+      const after=`${labExpr(labState.left)} = ${labExpr(labState.right)}`;
+      const operation=labState.op==='divide'?'Bagi':labState.op==='multiply'?'Kali':labState.op==='add'?'Tambah':'Kurangi';
+      const detail=labState.op==='divide'||labState.op==='multiply'?`${operation} ${value} pada kedua ruas`:`${operation} ${xValue||0}x dan ${value} pada kedua ruas`;
+      const item=document.createElement('li');
+      item.textContent=`${detail}: ${before} → ${after}`;
+      document.getElementById('lab-history').appendChild(item);
+      renderLab();
+    });
+    selectLabType('one');
+    renderScale();
+    showSolveStage(0);
+    document.addEventListener('keydown', event => {
+      if (event.target.closest('input, textarea, select, button, a, [contenteditable="true"], [role="button"]') || event.altKey || event.ctrlKey || event.metaKey) return;
+      const destination = {ArrowRight:current+1, ArrowLeft:current-1, Home:0, End:slides.length-1}[event.key];
+      if (destination !== undefined) {event.preventDefault(); showSlide(destination);}
+    });
+    showSlide(0);
+    })();
+  </script>
+ </body>
+</html>
